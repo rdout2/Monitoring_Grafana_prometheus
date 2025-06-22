@@ -1,19 +1,19 @@
 # 📈 Monitoring avec Prometheus, Node Exporter et Grafana (via Docker Compose)
 
-Ce guide vous montre comment mettre en place un stack de monitoring complet avec **Prometheus**, **Node Exporter** et **Grafana** via **Docker Compose**, créer vos propres dashboards, utiliser des variables, et importer des dashboards existants.
+Ce guide vous montre comment mettre en place un stack de monitoring complet avec **Prometheus**, **Node Exporter** et **Grafana**, via Docker Compose. Vous apprendrez à créer vos dashboards, utiliser des variables et importer des dashboards existants.
 
 ---
 
 ## 🧰 Prérequis
 
-- Docker et Docker Compose installés
-- Notions de base sur Prometheus et les métriques système
+- Docker & Docker Compose installés
+- Connaissances de base sur Prometheus & les métriques système
 
 ---
 
-## ⚙️ Étape 1 : Configuration de Prometheus & Node Exporter
+## ⚙️ Étape 1 : Configuration de Prometheus, Node Exporter & Grafana
 
-Créez un fichier `compose.yaml` :
+### Fichier `compose.yaml`
 
 ```yaml
 services:
@@ -61,11 +61,11 @@ networks:
 volumes:
   prometheus_data:
   grafana_data:
-Créez également un fichier prometheus.yml :
+```
 
-yaml
-Copier
-Modifier
+### Fichier `prometheus.yml`
+
+```yaml
 global:
   scrape_interval: 10s
 
@@ -74,113 +74,115 @@ scrape_configs:
     static_configs:
       - targets:
           - 'node-exporter:9100'
-Lancez la stack :
+```
 
-bash
-Copier
-Modifier
+### Lancer la stack
+
+```bash
 docker compose up -d
-Vérifiez ici : http://localhost:9090/targets
+```
 
-📊 Accès à Grafana
-Accédez à Grafana : http://localhost:3000
-
-Identifiants par défaut : admin / admin
-
-🔗 Connecter Prometheus à Grafana
-Aller dans Connections > Add new connection
-
-Choisir Prometheus
-
-Entrer l'URL : http://prometheus:9090
-
-Cliquez sur Save & test
-
-📈 Créer des Dashboards
-▶️ Uptime (Stat)
-promql
-Copier
-Modifier
-node_time_seconds{instance="node-exporter:9100"} - node_boot_time_seconds{instance="node-exporter:9100"}
-Type : Stat
-
-Unité : seconds
-
-🧠 RAM utilisée (Time series)
-promql
-Copier
-Modifier
-node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes
-Type : Time series
-
-Unité : bytes (IEC)
-
-💽 Espace disque utilisé (Gauge)
-promql
-Copier
-Modifier
-1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})
-Type : Gauge
-
-Unité : Percent (0–1)
-
-Ajoutez des seuils (thresholds)
-
-🧩 Ajouter des variables dans Grafana
-Aller dans Dashboard Settings > Variables
-
-Ajouter une variable :
-
-Name : job
-
-Type : Query
-
-Data source : Prometheus
-
-Query : label_values(node_uname_info, job)
-
-Cliquez sur Update
-
-Utilisez-la dans vos requêtes :
-
-promql
-Copier
-Modifier
-{job="$job"}
-📥 Importer un Dashboard prêt à l'emploi
-Aller dans Dashboards > New > Import
-
-Coller l’ID ou l’URL :
-
-ruby
-Copier
-Modifier
-1860
-https://grafana.com/grafana/dashboards/1860-node-exporter-full/
-Sélectionner Prometheus comme source
-
-Importer 🎉
-
-✅ Résultat
-🎉 Vous avez maintenant un environnement de monitoring complet avec Prometheus, Node Exporter et Grafana, prêt pour la production !
-
-🔭 Aller plus loin
-Ajouter des alertes Prometheus
-
-
-
-Monitorer plusieurs machines (ajouter d'autres node-exporter avec des labels)
-
-
-yaml
-Copier
-Modifier
+Accéder aux cibles : http://localhost:9090/targets
 
 ---
 
+## 📊 Accéder à Grafana
 
+- Interface : http://localhost:3000
+- Identifiants par défaut : `admin` / `admin`
 
+---
 
+## 🔗 Connecter Prometheus à Grafana
 
+1. Aller dans **Connections > Add new connection**
+2. Choisir **Prometheus**
+3. URL : `http://prometheus:9090`
+4. Cliquez sur **Save & test**
 
+---
 
+## 📈 Créer des Dashboards
+
+### ▶️ Uptime (Stat)
+
+```promql
+node_time_seconds{instance="node-exporter:9100"} - node_boot_time_seconds{instance="node-exporter:9100"}
+```
+
+- Type : Stat  
+- Unité : seconds
+
+---
+
+### 🧠 RAM utilisée (Time series)
+
+```promql
+node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes
+```
+
+- Type : Time series  
+- Unité : bytes (IEC)
+
+---
+
+### 💽 Espace disque utilisé (Gauge)
+
+```promql
+1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})
+```
+
+- Type : Gauge  
+- Unité : Percent (0–1)  
+- Ajoutez des seuils (thresholds)
+
+---
+
+## 🧩 Ajouter des variables dans Grafana
+
+1. Aller dans **Dashboard Settings > Variables**
+2. Ajouter une variable :
+   - Name : `job`
+   - Type : `Query`
+   - Data source : `Prometheus`
+   - Query : `label_values(node_uname_info, job)`
+3. Cliquez sur **Update**
+
+Utilisation dans vos requêtes :
+
+```promql
+{job="$job"}
+```
+
+---
+
+## 📥 Importer un Dashboard existant
+
+1. Aller dans **Dashboards > New > Import**
+2. Coller l’ID ou l’URL :
+
+```
+1860
+https://grafana.com/grafana/dashboards/1860-node-exporter-full/
+```
+
+3. Sélectionner la source Prometheus
+4. Importer 🎉
+
+---
+
+## ✅ Résultat
+
+🎉 Vous disposez maintenant d’un environnement de monitoring complet avec Prometheus, Node Exporter et Grafana.
+
+---
+
+## 🔭 Aller plus loin
+
+- Ajouter des alertes Prometheus
+- Monitorer plusieurs machines (ajouter plusieurs `node-exporter` avec des labels différents)
+- Ajouter des notifications dans Grafana (Slack, Discord, Email…)
+
+---
+
+> Ce guide est open-source et réutilisable. Contributions bienvenues 🚀
